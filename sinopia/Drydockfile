@@ -1,0 +1,30 @@
+#!/usr/bin/env drydock
+
+APP_ROOT  = '/app'
+REPO_NAME = 'ripta/sinopia'
+TAG_NAME  = 'v1.4.0'
+
+from 'alpine', '3.2'
+
+with Plugins::APK do |pkg|
+  pkg.update
+  pkg.add 'nodejs'
+end
+
+build_image = derive do
+  with Plugins::APK do |pkg|
+    pkg.add 'python'
+    pkg.add 'gcc', 'g++'
+    pkg.add 'make'
+  end
+
+  env 'APP_ROOT', APP_ROOT 
+  mkdir APP_ROOT
+  cd APP_ROOT do
+    with(Plugins::NPM).install 'sinopia'
+  end
+end
+
+derive do
+  import APP_ROOT, from: build_image
+end
