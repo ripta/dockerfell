@@ -2,8 +2,9 @@
 
 APP_ROOT  = '/app'
 REPO_NAME = 'ripta/sinopia'
-TAG_NAME  = 'v1.4.0'
+TAG_NAME  = '1.4.0'
 
+author name: 'Ripta Pasay', email: 'ripta+docker@pasay.name'
 from 'alpine', '3.2'
 
 with Plugins::APK do |pkg|
@@ -23,8 +24,13 @@ build_image = derive do
   cd APP_ROOT do
     with(Plugins::NPM).install 'sinopia'
   end
+
+  tag "#{REPO_NAME}-build", TAG_NAME, force: true
 end
 
 derive do
   import APP_ROOT, from: build_image
+  expose tcp: 4873
+  cmd ['node', '$APP_ROOT/node_modules/.bin/sinopia']
+  tag REPO_NAME, TAG_NAME, force: true
 end
